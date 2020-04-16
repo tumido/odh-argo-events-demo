@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: example-sensor
+  name: demo-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: odh-argo-demo
 spec:
@@ -70,7 +70,7 @@ spec:
           parameters:
             - src:
                 dependencyName: any-dep
-                dataTemplate: "{{ (default .Input .Input.body).userPayload.message }}"
+                dataTemplate: "{{ (default .Input.body .Input.userPayload).message }}"
               dest: spec.arguments.parameters.0.value
             - src:
                 dependencyName: any-dep

@@ -6,12 +6,12 @@ metadata:
 spec:
   type: calendar
   calendar:
-    example-with-interval:
-      interval: 60s
-      userPayload: {"message": "This workflow was triggered by an INTERVAL event"}
-    example-with-schedule:
-      schedule: "*/1 * * * *"
-      userPayload: {"message": "This workflow was triggered by an SCHEDULE event"}
+    example-calendar-interval:
+      interval: 5m
+      userPayload: {"message": "Hi! I am a Humpback whale!"}
+    example-calendar-schedule:
+      schedule: "*/5 * * * *"
+      userPayload: {"message": "Greetings! I am a Killer whale!"}
 ...
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -42,5 +42,5 @@ spec:
       serviceAccountName: argo-events-sa
   subscribers:
     http:
-      - "http://example-sensor.odh-argo-demo.svc:9300/"
+      - "http://demo-sensor.odh-argo-demo.svc:9300/"
 ...

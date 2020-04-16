@@ -6,7 +6,7 @@ metadata:
 spec:
   type: webhook
   webhook:
-    example:
+    example-webhook:
       port: "12000"
       endpoint: /example
       method: POST
@@ -51,7 +51,7 @@ spec:
       type: LoadBalancer
   subscribers:
     http:
-      - "http://example-sensor.odh-argo-demo.svc:9300/"
+      - "http://demo-sensor.odh-argo-demo.svc:9300/"
 ...
 ---
 apiVersion: v1
