@@ -1,0 +1,78 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: example-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: odh-argo-demo
+spec:
+  template:
+    spec:
+      containers:
+        - name: sensor
+          image: argoproj/sensor:v0.14.0
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
+
+  dependencies:
+    - name: any-dep
+      gatewayName: "{calendar-gateway,webhook-gateway}"
+      eventName: "*"
+
+  subscription:
+    http:
+      port: 9300
+
+  triggers:
+    # - template:
+    #     name: slack-trigger
+    #     slack:
+    #       channel: argonaut-tcoufal-test
+    #       message: A workflow has been triggered by an unknown source
+    #       slackToken:
+    #         key: token
+    #         name: slack-secret
+    #       namespace: odh-argo-demo
+    #   parameters:
+    #     - src:
+    #         contextTemplate: "A workflow has been triggered by `{{ .Input.source }}:{{ .Input.subject }}`"
+    #       dest: slack.message
+
+    - template:
+        name: workflow-trigger
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: workflow-
+                labels:
+                  triggered-by: "???"
+              spec:
+                entrypoint: start-here
+                arguments:
+                  parameters:
+                  - name: message
+                    value: ""
+                templates:
+                - name: start-here
+                  inputs:
+                    parameters:
+                    - name: message
+                  container:
+                    image: docker/whalesay:latest
+                    command: [ cowsay ]
+                    args: [ "{{inputs.parameters.message}}" ]
+          parameters:
+            - src:
+                dependencyName: any-dep
+                dataTemplate: "{{ (default .Input .Input.body).userPayload.message }}"
+              dest: spec.arguments.parameters.0.value
+            - src:
+                dependencyName: any-dep
+                contextKey: subject
+              dest: metadata.labels.triggered-by

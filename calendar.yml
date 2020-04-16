@@ -1,0 +1,46 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: calendar-event-source
+spec:
+  type: calendar
+  calendar:
+    example-with-interval:
+      interval: 60s
+      userPayload: {"message": "This workflow was triggered by an INTERVAL event"}
+    example-with-schedule:
+      schedule: "*/1 * * * *"
+      userPayload: {"message": "This workflow was triggered by an SCHEDULE event"}
+...
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: calendar-gateway
+  labels:
+    gateways.argoproj.io/gateway-controller-instanceid: odh-argo-demo
+spec:
+  type: calendar
+  eventSourceRef:
+    name: calendar-event-source
+  template:
+    metadata:
+      name: calendar-gateway
+      labels:
+        gateway-name: calendar-gateway
+    spec:
+      containers:
+        - name: gateway-client
+          image: argoproj/gateway-client:v0.14.0
+          imagePullPolicy: Always
+          command: ["/bin/gateway-client"]
+        - name: calendar-events
+          image: argoproj/calendar-gateway:v0.14.0
+          imagePullPolicy: Always
+          command: ["/bin/calendar-gateway"]
+      serviceAccountName: argo-events-sa
+  subscribers:
+    http:
+      - "http://example-sensor.odh-argo-demo.svc:9300/"
+...

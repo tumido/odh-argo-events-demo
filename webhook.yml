@@ -1,0 +1,67 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: webhook-event-source
+spec:
+  type: webhook
+  webhook:
+    example:
+      port: "12000"
+      endpoint: /example
+      method: POST
+...
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: webhook-gateway
+  labels:
+    gateways.argoproj.io/gateway-controller-instanceid: odh-argo-demo
+spec:
+  replica: 1
+  type: webhook
+  eventSourceRef:
+    name: webhook-event-source
+  template:
+    metadata:
+      name: webhook-gateway
+      labels:
+        gateway-name: webhook-gateway
+    spec:
+      containers:
+        - name: gateway-client
+          image: argoproj/gateway-client:v0.14.0
+          imagePullPolicy: Always
+          command: ["/bin/gateway-client"]
+        - name: webhook-events
+          image: argoproj/webhook-gateway:v0.14.0
+          imagePullPolicy: Always
+          command: ["/bin/webhook-gateway"]
+      serviceAccountName: argo-events-sa
+  service:
+    metadata:
+      name: webhook-gateway-svc
+    spec:
+      selector:
+        gateway-name: webhook-gateway
+      ports:
+        - port: 12000
+          targetPort: 12000
+      type: LoadBalancer
+  subscribers:
+    http:
+      - "http://example-sensor.odh-argo-demo.svc:9300/"
+...
+---
+apiVersion: v1
+kind: Route
+metadata:
+  name: webhook
+spec:
+  port:
+    targetPort: 12000
+  to:
+    kind: Service
+    name: webhook-gateway-svc
+...
