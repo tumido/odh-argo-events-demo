@@ -15,7 +15,7 @@ spec:
 
   dependencies:
     - name: any-dep
-      gatewayName: "{calendar-gateway,webhook-gateway}"
+      gatewayName: "{calendar-gateway,webhook-gateway,kafka-gateway}"
       eventName: "*"
 
   subscription:

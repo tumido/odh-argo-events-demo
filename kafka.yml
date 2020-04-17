@@ -2,44 +2,49 @@
 apiVersion: argoproj.io/v1alpha1
 kind: EventSource
 metadata:
-  name: calendar-event-source
+  name: kafka-event-source
 spec:
-  type: calendar
-  calendar:
-    example-calendar-interval:
-      interval: 5m
-      userPayload: {"message": "Hi! I am a Humpback whale!"}
-    example-calendar-schedule:
-      schedule: "*/5 * * * *"
-      userPayload: {"message": "Greetings! I am a Killer whale!"}
+  type: kafka
+  kafka:
+    example-kafka:
+      url: dev-kafka-bootstrap.dh-dev-message-bus:9092
+      topic: argo-events-demo-topic
+      jsonBody: true
+      partition: "0"
+      connectionBackoff:
+        duration: 10000000000
+        steps: 5
+        factor: 2
+        jitter: 0.2
+
 ...
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: calendar-gateway
+  name: kafka-gateway
   labels:
     gateways.argoproj.io/gateway-controller-instanceid: odh-argo-demo
 spec:
   replica: 1
-  type: calendar
+  type: kafka
   eventSourceRef:
-    name: calendar-event-source
+    name: kafka-event-source
   template:
     metadata:
-      name: calendar-gateway
+      name: kafka-gateway
       labels:
-        gateway-name: calendar-gateway
+        gateway-name: kafka-gateway
     spec:
       containers:
         - name: gateway-client
           image: argoproj/gateway-client:v0.14.0
           imagePullPolicy: Always
           command: ["/bin/gateway-client"]
-        - name: calendar-events
-          image: argoproj/calendar-gateway:v0.14.0
+        - name: kafka-events
+          image: argoproj/kafka-gateway:v0.14.0
           imagePullPolicy: Always
-          command: ["/bin/calendar-gateway"]
+          command: ["/bin/kafka-gateway"]
       serviceAccountName: argo-events-sa
   subscribers:
     http:
