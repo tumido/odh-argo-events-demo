@@ -22,8 +22,8 @@ curl -X POST -d '{"message": "Hello! I am a Beluga whale!"}' http://webhook-odh-
 
 ```sh
 oc project dh-dev-message-bus
-oc exec dev-kafka-0 -- bash -c "echo \'{\"message\":\"Hey! I am a Blue whale\"}\' | /opt/kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic argo-events-demo-topic"
-oc project odh-argo-demo
+oc exec dev-kafka-0 -- bash -c "echo \'{\\\"message\\\":\\\"Hey! I am a Blue whale\\\"}\' | /opt/kafka/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic argo-events-demo-topic"
+oc project dh-dev-argo
 ```
 
 ## Observe

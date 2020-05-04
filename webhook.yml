@@ -17,7 +17,7 @@ kind: Gateway
 metadata:
   name: webhook-gateway
   labels:
-    gateways.argoproj.io/gateway-controller-instanceid: odh-argo-demo
+    gateways.argoproj.io/gateway-controller-instanceid: dh-dev-argo
 spec:
   replica: 1
   type: webhook
@@ -32,11 +32,9 @@ spec:
       containers:
         - name: gateway-client
           image: argoproj/gateway-client:v0.14.0
-          imagePullPolicy: Always
           command: ["/bin/gateway-client"]
         - name: webhook-events
           image: argoproj/webhook-gateway:v0.14.0
-          imagePullPolicy: Always
           command: ["/bin/webhook-gateway"]
       serviceAccountName: argo-events-sa
   service:
@@ -51,7 +49,7 @@ spec:
       type: LoadBalancer
   subscribers:
     http:
-      - "http://demo-sensor.odh-argo-demo.svc:9300/"
+      - "http://demo-sensor.dh-dev-argo.svc:9300/"
 ...
 ---
 apiVersion: v1
